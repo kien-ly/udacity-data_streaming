@@ -24,22 +24,16 @@ class Turnstile(Producer):
         Args:
             station (Station): The station object associated with the turnstile.
         """
-        # Sanitize the station name to be used in Kafka topic name
-        station_name = (
-            station.name.lower()
-            .replace("/", "_and_")
-            .replace(" ", "_")
-            .replace("-", "_")
-            .replace("'", "")
-        )
+        # Use a static topic for all stations (no change per station)
+        topic_name = "org.chicago.cta.station.turnstile.v1"  # Static topic for all stations
 
         # Initialize the producer (inherited from Producer class)
         super().__init__(
-            topic_name=f"org.chicago.cta.station.turnstile.v1.{station_name}",
+            topic_name=topic_name,
             key_schema=Turnstile.key_schema,
             value_schema=Turnstile.value_schema,
-            num_partitions=3,
-            num_replicas=1,
+            num_partitions=6,  # Increase number of partitions for better load distribution
+            num_replicas=3     # Increase number of replicas for better fault tolerance and data durability
         )
 
         # Store the station and turnstile hardware references

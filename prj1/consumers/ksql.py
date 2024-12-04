@@ -16,9 +16,11 @@ CREATE TABLE turnstile (
     station_name VARCHAR,
     line VARCHAR
 ) WITH (
-    KAFKA_TOPIC = 'org.chicago.cta.station.turnstile.v1',
+    KAFKA_TOPIC = 'org.chicago.cta.station.turnstile.v1',  -- Use a static topic for all stations
     VALUE_FORMAT = 'avro',
-    KEY = 'station_id'
+    KEY = 'station_id',
+    PARTITIONS = 6,  -- Increase the number of partitions to ensure better distribution of data in real-world scenarios
+    REPLICAS = 3     -- Increase the number of replicas for better fault tolerance and data durability
 );
 
 CREATE TABLE turnstile_summary
@@ -27,6 +29,8 @@ WITH (VALUE_FORMAT = 'json') AS
     FROM turnstile
     GROUP BY station_id;
 """
+# This KSQL statement will create the necessary tables and stream the data into a summary table.
+# Ensure the turnstile topic is static (not changing per station) and partition/replica settings are optimized.
 
 def execute_ksql_statement():
     """
